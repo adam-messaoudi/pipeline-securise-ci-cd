@@ -1,0 +1,25 @@
+name: CI Vérification App
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-app:
+    name: Vérification de l'application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Cloner le dépôt
+        uses: actions/checkout@v4
+
+      - name: 📂 Aller dans le dossier app
+        working-directory: ./app
+        run: |
+          echo "Contenu du dossier app :"
+          ls -la
+
+      - name: ✅ Exécuter le script de vérification
+        working-directory: ./app
+        run: ./check_app.sh
