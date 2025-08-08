@@ -1,50 +1,17 @@
 ---
-- name: Déploiement de l'application web
-  hosts: all
-  become: yes
-
-  vars:
-    app_src: "../app"
-    app_dest: "/var/www/html/tp-app"
-    server_ip: "{{ ansible_host }}"
+- name: Déploiement application HTML
+  hosts: webserver
+  become: true
 
   tasks:
-    - name: Installer Nginx
-      apt:
-        name: nginx
-        state: present
-        update_cache: yes
-
-    - name: Créer le répertoire de destination
+    - name: Créer dossier /var/www/html
       file:
-        path: "{{ app_dest }}"
+        path: /var/www/html
         state: directory
         mode: '0755'
 
-    - name: Copier les fichiers de l'application
+    - name: Copier index.html
       copy:
-        src: "{{ app_src }}/"
-        dest: "{{ app_dest }}/"
+        src: app/index.html
+        dest: /var/www/html/index.html
         mode: '0644'
-
-    - name: Copier la configuration Nginx
-      template:
-        src: "nginx_vhost.conf.j2"
-        dest: "/etc/nginx/sites-available/tp-app.conf"
-
-    - name: Activer le virtual host
-      file:
-        src: "/etc/nginx/sites-available/tp-app.conf"
-        dest: "/etc/nginx/sites-enabled/tp-app.conf"
-        state: link
-        force: yes
-
-    - name: Supprimer la config par défaut de Nginx
-      file:
-        path: "/etc/nginx/sites-enabled/default"
-        state: absent
-
-    - name: Redémarrer Nginx
-      service:
-        name: nginx
-        state: restarted
