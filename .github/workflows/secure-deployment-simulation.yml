@@ -1,0 +1,33 @@
+name: Secure Deployment Simulation
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  simulate-deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Validate SSH Key Format
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" | head -1 | grep "BEGIN RSA PRIVATE KEY" || exit 1
+        echo "✅ SSH Key format valid"
+    
+    - name: Check Key Size (simulation)
+      run: |
+        echo "✅ Key size validation would occur here (minimum 2048 bits)"
+    
+    - name: Validate Secrets Configuration
+      run: |
+        [ -n "${{ secrets.SERVER_IP }}" ] && echo "✅ SERVER_IP configured" || exit 1
+        [ -n "${{ secrets.SERVER_USER }}" ] && echo "✅ SERVER_USER configured" || exit 1
+        [ -n "${{ secrets.SSH_PRIVATE_KEY }}" ] && echo "✅ SSH_PRIVATE_KEY configured" || exit 1
+    
+    - name: Simulate SSH Commands
+      run: |
+        echo "Simulating SSH commands..."
+        echo "ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'sudo systemctl restart myapp.service'"
+        echo "✅ Simulation complete"
+
