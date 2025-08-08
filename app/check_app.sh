@@ -1,11 +1,16 @@
 #!/bin/bash
-echo "🔍 Démarrage des vérifications..."
-if [ -f "index.html" ]; then
-    echo "✅ Fichier index.html trouvé."
-    echo "✔️ Vérifications terminées avec succès."
+# Active le mode strict : exit si une commande échoue
+set -e
+
+echo "=== Début de la vérification de l'application ==="
+
+# Vérifie si le fichier index.html existe
+if [ -f "app/index.html" ]; then
+    echo "[OK] index.html trouvé."
     exit 0
 else
-    echo "❌ Fichier index.html manquant."
-    echo "❌ Vérifications échouées."
+    echo "[ERREUR] index.html manquant."
     exit 1
 fi
+
+echo "=== Fin de la vérification ==="
