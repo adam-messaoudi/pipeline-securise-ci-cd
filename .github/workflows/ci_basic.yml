@@ -20,3 +20,12 @@ jobs:
 
       - name: Display index.html content
         run: cat ./app/index.html
+
+      - name: Display secrets and environment variables
+        run: |
+          echo "Environment Type: ${{ secrets.ENV_TYPE }}"
+          echo "API Token: ${{ secrets.FAKE_API_TOKEN }}"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Custom Variable: $CUSTOM_VAR"
+        env:
+          CUSTOM_VAR: "Production Ready"
