@@ -2,7 +2,7 @@ name: Basic CI Workflow
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   build-and-test:
@@ -12,9 +12,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Give execute permission to check_app.sh
+        run: chmod +x ./app/check_app.sh
+
       - name: Run application check script
         run: ./app/check_app.sh
 
       - name: Display index.html content
-        run: cat app/index.html
-
+        run: cat ./app/index.html
