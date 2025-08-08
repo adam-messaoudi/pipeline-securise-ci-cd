@@ -1,0 +1,55 @@
+name: CI/CD complet
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Tes étapes de build et test ici (ex: installer dépendances, lancer tests)
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Create Ansible inventory file
+        run: |
+          echo "[tp-server]" > inventory.ini
+          echo "${{ secrets.SERVER_IP }} ansible_user=${{ secrets.SERVER_USER }}" >> inventory.ini
+          chmod 600 inventory.ini
+
+      - name: Install Ansible
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Run Ansible playbook
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ansible-playbook -i inventory.ini ansible/deploy.yml --extra-vars "server_ip=${SERVER_IP} server_user=${SERVER_USER}"
