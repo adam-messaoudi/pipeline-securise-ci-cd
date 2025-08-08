@@ -1,0 +1,54 @@
+name: 🛡️ Secure Deployment Simulation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  simulate-deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📂 Checkout
+      uses: actions/checkout@v4
+
+    - name: 🔐 Validate SSH Key
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+
+        # Vérifie que la clé est RSA 2048 bits
+        ssh-keygen -lf private_key.pem
+
+        # Vérifie qu'elle n'a pas de passphrase
+        if ssh-keygen -y -f private_key.pem >/dev/null 2>&1; then
+          echo "✅ SSH key OK"
+        else
+          echo "❌ SSH key invalide"
+          exit 1
+        fi
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: 🔍 Check secrets and env
+      run: |
+        echo "SERVER_IP: $SERVER_IP"
+        echo "SERVER_USER: $SERVER_USER"
+        echo "Custom ENV: ENV=DEV"
+        echo "Runner OS: $RUNNER_OS"
+      env:
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        ENV: DEV
+        RUNNER_OS: ${{ runner.os }}
+
+    - name: 💻 Simulate SSH connection
+      run: |
+        echo "Simulating SSH command..."
+        echo "ssh -i private_key.pem ${SERVER_USER}@${SERVER_IP} 'echo Deployment started'"
+        echo "Would run: mkdir -p /opt/app && sudo systemctl restart myservice"
+      env:
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}

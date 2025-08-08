@@ -1,17 +1,56 @@
 ---
-- name: Déploiement application HTML
-  hosts: webserver
-  become: true
+- name: Déploiement de l'application TP
+  hosts: tpapp_servers
+  become: yes
+
+  vars:
+    app_dest_dir: /var/www/html/tp-app
 
   tasks:
-    - name: Créer dossier /var/www/html
+    - name: Installer Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Créer le répertoire de destination de l'application
       file:
-        path: /var/www/html
+        path: "{{ app_dest_dir }}"
         state: directory
+        owner: www-data
+        group: www-data
         mode: '0755'
 
-    - name: Copier index.html
+    - name: Copier les fichiers de l'application
       copy:
-        src: app/index.html
-        dest: /var/www/html/index.html
+        src: ../app/
+        dest: "{{ app_dest_dir }}/"
+        owner: www-data
+        group: www-data
         mode: '0644'
+      delegate_to: localhost
+
+    - name: Déployer la configuration Nginx avec template Jinja2
+      template:
+        src: nginx_vhost.conf.j2
+        dest: /etc/nginx/sites-available/tp-app.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Activer le site Nginx
+      file:
+        src: /etc/nginx/sites-available/tp-app.conf
+        dest: /etc/nginx/sites-enabled/tp-app.conf
+        state: link
+        force: yes
+
+    - name: Supprimer le site par défaut (optionnel)
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Redémarrer Nginx pour appliquer les changements
+      service:
+        name: nginx
+        state: restarted

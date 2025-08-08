@@ -1,0 +1,16 @@
+server {
+    listen 80;
+    server_name {{ ansible_host }};
+
+    root /var/www/html/tp-app;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    error_log /var/log/nginx/tp-app_error.log;
+    access_log /var/log/nginx/tp-app_access.log;
+}
+
+

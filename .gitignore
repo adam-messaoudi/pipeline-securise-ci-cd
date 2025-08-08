@@ -1,0 +1,13 @@
+# Ignore SSH keys
+*.pem
+*.key
+*.pem
+
+# Ignore inventory if tu ne veux pas le partager
+inventory.ini
+
+# Ignore fichiers temporaires et système
+*.log
+*.tmp
+*.swp
+.DS_Store
